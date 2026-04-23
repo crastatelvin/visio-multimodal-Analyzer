@@ -342,6 +342,6 @@ See [`DECISIONS.md`](./DECISIONS.md) for architecture rationale, including:
 
 This project is licensed under the MIT License. See [LICENSE](./LICENSE).
 
-                            ### Built by [Telvin Crasta](https://github.com/crastatelvin) · Production-ready · Live today
+                              Built by Telvin Crasta· Production-ready · Live today
 
-                                      ⭐ **If VISIO helped you ship invoice intelligence faster, star the repo.**
+                       ⭐ If VISIO helped you ship invoice intelligence faster, star the repo.
