@@ -1,17 +1,17 @@
 # VISIO - Multimodal Document Intelligence
 
-VISIO scans uploaded documents, extracts structured intelligence, and supports Q&A over the extracted content.
+Drop any visual document and VISIO extracts document type, text, entities, key-values, tables, sentiment, and structured output in a scanner-style interface.
 
-## Scope Implemented
-- Single-user demo baseline
-- Synchronous scan API with job-scoped progress updates
-- Canonical server-side preview image used by backend and frontend
-- Typed response contracts
-- JSON-first model parsing with safe fallback
-
-## Project Structure
-- `backend/`: FastAPI service, Gemini integration, parsing, tests
-- `frontend/`: React app wired to typed API contracts
+## Folder Structure
+- `backend/main.py` - FastAPI app and API routes
+- `backend/document_processor.py` - PDF/image/text conversion and normalization
+- `backend/vision_analyzer.py` - Vision analysis orchestration
+- `backend/entity_extractor.py` - Entity normalization
+- `backend/structured_extractor.py` - Structured extraction helpers
+- `backend/gemini_service.py` - Gemini API integration and parser
+- `frontend/src/components/` - Scanner viewport and extraction UI components
+- `frontend/src/pages/` - `UploadPage` and `ScannerPage`
+- `sample_docs/` - Sample files for quick validation
 
 ## Backend Setup
 ```bash
@@ -32,16 +32,14 @@ npm start
 ```
 
 ## API
-- `POST /scan?job_id=<uuid>`: upload and scan
-- `POST /ask?job_id=<uuid>`: ask follow-up question
-- `GET /latest?job_id=<uuid>`: fetch latest result for a job
-- `WS /ws?job_id=<uuid>`: progress events for a job
-- `GET /metrics`: basic service counters
-- `GET /status`: health and runtime status
+- `POST /scan?job_id=<uuid>&pdf_mode=first_page|all_pages&pdf_page_limit=3`
+- `POST /ask?job_id=<uuid>`
+- `GET /latest?job_id=<uuid>`
+- `GET /status`
+- `GET /metrics`
+- `WS /ws?job_id=<uuid>`
 
-## Notes
-- CORS is env-configurable via `VISIO_ALLOWED_ORIGINS`.
-- Storage is SQLite-backed via `VISIO_DB_PATH` (default `visio.db`).
-- Rate limiting is SQLite-backed for single-instance deployment.
-- Request IDs are emitted in `x-request-id` response headers.
-- Set `VISIO_API_KEY` to enforce `x-api-key` on `POST /scan` and `POST /ask`.
+## Runtime Notes
+- Set `GEMINI_API_KEY` in `backend/.env`.
+- Optional: set `VISIO_API_KEY` to require `x-api-key` on scan/ask routes.
+- SQLite persistence path is set by `VISIO_DB_PATH` (default `visio.db`).

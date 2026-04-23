@@ -10,7 +10,10 @@ from dotenv import load_dotenv
 
 from config import get_settings
 from document_processor import process_upload, validate_upload
-from gemini_service import analyze_document_vision, ask_document_question
+from gemini_service import ask_document_question
+from vision_analyzer import analyze_visual_document
+from entity_extractor import extract_entities
+from structured_extractor import extract_structured_content
 from schemas import ApiError, AskRequest, AskResponse, ScanResponse, ScanResult
 from storage import SQLiteStore
 
@@ -142,7 +145,10 @@ async def scan_document(
             pdf_page_limit=pdf_page_limit,
         )
         await broadcast(job_id, {"step": "scanning", "message": "Analyzing with Gemini..."})
-        analysis = analyze_document_vision(image_data["base64"], image_data["media_type"])
+        analysis = analyze_visual_document(image_data["base64"], image_data["media_type"])
+        entities = extract_entities(analysis)
+        structured = extract_structured_content(analysis)
+        sentiment_data = analysis.get("sentiment", {"label": "neutral", "score": 0.5})
 
         result = ScanResult(
             filename=file.filename or "upload.bin",
@@ -153,11 +159,12 @@ async def scan_document(
             document_type=analysis.get("document_type", "Unknown"),
             language=analysis.get("language", "English"),
             summary=analysis.get("summary", ""),
-            full_text=analysis.get("full_text", ""),
-            entities=analysis.get("entities", []),
-            key_values=analysis.get("key_values", {}),
-            tables=analysis.get("tables", []),
-            sentiment=analysis.get("sentiment", {"label": "neutral", "score": 0.5}),
+            full_text=structured.get("full_text", ""),
+            entities=entities,
+            key_values=structured.get("key_values", {}),
+            tables=structured.get("tables", []),
+            sentiment=str(sentiment_data.get("label", "neutral")),
+            sentiment_score=float(sentiment_data.get("score", 0.5)),
             quality_score=int(analysis.get("quality_score", 0)),
             confidence=int(analysis.get("confidence", 0)),
             raw_model_output=analysis.get("raw_model_output", ""),

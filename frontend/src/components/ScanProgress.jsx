@@ -1,31 +1,27 @@
-const STEP_LABELS = {
-  validating: "Validating upload",
-  uploading: "Uploading",
-  rendering_pages: "Rendering pages",
-  scanning: "Scanning with AI",
-  complete: "Complete",
-  error: "Error"
-};
+const LAYERS = [
+  { id: "uploading", label: "Uploading document" },
+  { id: "rendering_pages", label: "Rendering pages" },
+  { id: "scanning", label: "AI vision scanning" },
+  { id: "complete", label: "Extraction complete" }
+];
 
-const ORDER = ["validating", "uploading", "rendering_pages", "scanning", "complete"];
-
-export default function ScanProgress({ step }) {
-  if (!step) return null;
-  const currentIndex = ORDER.indexOf(step);
+export default function ScanProgress({ currentStep, visible }) {
+  if (!visible) return null;
+  const currentIndex = LAYERS.findIndex((l) => l.id === currentStep);
   return (
-    <section className="panel">
-      <p><b>Progress:</b> {STEP_LABELS[step] || step}</p>
+    <div className="card">
+      <div className="mono-title">SCAN PROGRESS</div>
       <div className="progressRow">
-        {ORDER.map((s, idx) => {
-          const done = currentIndex >= idx || step === "complete";
-          const active = s === step;
+        {LAYERS.map((layer, i) => {
+          const done = i < currentIndex;
+          const active = i === currentIndex;
           return (
-            <div key={s} className={`progressNode ${done ? "done" : ""} ${active ? "active" : ""}`}>
-              {STEP_LABELS[s]}
+            <div key={layer.id} className={`progressNode ${done ? "done" : ""} ${active ? "active" : ""}`}>
+              {done ? "DONE: " : active ? "NOW: " : ""}{layer.label}
             </div>
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }

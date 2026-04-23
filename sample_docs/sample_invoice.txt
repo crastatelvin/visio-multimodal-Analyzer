@@ -1,0 +1,13 @@
+INVOICE #INV-2026-041
+Date: 2026-04-23
+Bill To: Acme Labs
+Vendor: Northwind Analytics
+
+Item                 Qty    Unit Price    Total
+Document Processing  120    2.50          300.00
+Model Inference      80     3.00          240.00
+
+Subtotal: 540.00
+Tax (10%): 54.00
+Total Due: 594.00
+Due Date: 2026-05-07

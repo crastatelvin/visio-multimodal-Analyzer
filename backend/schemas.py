@@ -26,7 +26,8 @@ class ScanResult(BaseModel):
     entities: list[Entity] = Field(default_factory=list)
     key_values: dict[str, str] = Field(default_factory=dict)
     tables: list[list[list[str]]] = Field(default_factory=list)
-    sentiment: Sentiment = Field(default_factory=Sentiment)
+    sentiment: str = "neutral"
+    sentiment_score: float = Field(default=0.5, ge=0.0, le=1.0)
     quality_score: int = Field(default=0, ge=0, le=100)
     confidence: int = Field(default=0, ge=0, le=100)
     raw_model_output: str = ""

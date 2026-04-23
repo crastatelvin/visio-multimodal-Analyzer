@@ -22,3 +22,9 @@ export async function askQuestion(jobId, question) {
   const res = await axios.post(`${BASE}/ask?job_id=${encodeURIComponent(jobId)}`, { question });
   return res.data;
 }
+
+export async function getLatest(jobId) {
+  const suffix = jobId ? `?job_id=${encodeURIComponent(jobId)}` : "";
+  const res = await axios.get(`${BASE}/latest${suffix}`);
+  return res.data;
+}
