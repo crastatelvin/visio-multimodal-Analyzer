@@ -1,4 +1,4 @@
-from gemini_service import parse_json_response
+from groq_service import parse_json_response
 
 
 def test_parse_json_response_valid():

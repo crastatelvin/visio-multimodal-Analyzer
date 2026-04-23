@@ -40,6 +40,6 @@ npm start
 - `WS /ws?job_id=<uuid>`
 
 ## Runtime Notes
-- Set `GEMINI_API_KEY` in `backend/.env`.
+- Set `GROQ_API_KEY` in `backend/.env`.
 - Optional: set `VISIO_API_KEY` to require `x-api-key` on scan/ask routes.
 - SQLite persistence path is set by `VISIO_DB_PATH` (default `visio.db`).

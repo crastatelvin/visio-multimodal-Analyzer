@@ -10,14 +10,14 @@ from dotenv import load_dotenv
 
 from config import get_settings
 from document_processor import process_upload, validate_upload
-from gemini_service import ask_document_question
+from groq_service import ask_document_question
 from vision_analyzer import analyze_visual_document
 from entity_extractor import extract_entities
 from structured_extractor import extract_structured_content
 from schemas import ApiError, AskRequest, AskResponse, ScanResponse, ScanResult
 from storage import SQLiteStore
 
-load_dotenv()
+load_dotenv(override=True)
 settings = get_settings()
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("visio")
