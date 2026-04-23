@@ -10,6 +10,8 @@ class Settings(BaseModel):
     max_image_dimension: int = 1600
     model_name: str = "gemini-1.5-flash"
     request_timeout_seconds: int = 120
+    db_path: str = "visio.db"
+    api_key: str = ""
 
 
 @lru_cache
@@ -23,4 +25,6 @@ def get_settings() -> Settings:
         max_image_dimension=int(os.getenv("VISIO_MAX_IMAGE_DIMENSION", "1600")),
         model_name=os.getenv("VISIO_MODEL", "gemini-1.5-flash"),
         request_timeout_seconds=int(os.getenv("VISIO_REQUEST_TIMEOUT_SECONDS", "120")),
+        db_path=os.getenv("VISIO_DB_PATH", "visio.db"),
+        api_key=os.getenv("VISIO_API_KEY", ""),
     )

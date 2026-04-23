@@ -36,7 +36,12 @@ npm start
 - `POST /ask?job_id=<uuid>`: ask follow-up question
 - `GET /latest?job_id=<uuid>`: fetch latest result for a job
 - `WS /ws?job_id=<uuid>`: progress events for a job
+- `GET /metrics`: basic service counters
+- `GET /status`: health and runtime status
 
 ## Notes
 - CORS is env-configurable via `VISIO_ALLOWED_ORIGINS`.
-- Rate limiting is in-memory for demo use; replace with distributed store for production.
+- Storage is SQLite-backed via `VISIO_DB_PATH` (default `visio.db`).
+- Rate limiting is SQLite-backed for single-instance deployment.
+- Request IDs are emitted in `x-request-id` response headers.
+- Set `VISIO_API_KEY` to enforce `x-api-key` on `POST /scan` and `POST /ask`.

@@ -1,42 +1,87 @@
-from dataclasses import dataclass
-from time import monotonic
+import json
+import sqlite3
+import time
 from threading import Lock
 
 
-@dataclass
-class RateState:
-    count: int
-    window_start: float
-
-
-class InMemoryStore:
-    def __init__(self) -> None:
-        self._latest_by_job: dict[str, dict] = {}
-        self._rates: dict[str, RateState] = {}
+class SQLiteStore:
+    def __init__(self, db_path: str) -> None:
+        self._conn = sqlite3.connect(db_path, check_same_thread=False)
         self._lock = Lock()
+        self._init_tables()
+
+    def _init_tables(self) -> None:
+        with self._conn:
+            self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS scans (
+                    job_id TEXT PRIMARY KEY,
+                    payload TEXT NOT NULL,
+                    created_at REAL NOT NULL
+                )
+                """
+            )
+            self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS rate_limits (
+                    rate_key TEXT PRIMARY KEY,
+                    count INTEGER NOT NULL,
+                    window_start REAL NOT NULL
+                )
+                """
+            )
 
     def set_latest(self, job_id: str, payload: dict) -> None:
         with self._lock:
-            self._latest_by_job[job_id] = payload
+            with self._conn:
+                self._conn.execute(
+                    """
+                    INSERT INTO scans(job_id, payload, created_at)
+                    VALUES(?, ?, ?)
+                    ON CONFLICT(job_id) DO UPDATE SET
+                        payload=excluded.payload,
+                        created_at=excluded.created_at
+                    """,
+                    (job_id, json.dumps(payload), time.time()),
+                )
 
     def get_latest(self, job_id: str) -> dict | None:
         with self._lock:
-            return self._latest_by_job.get(job_id)
+            row = self._conn.execute("SELECT payload FROM scans WHERE job_id = ?", (job_id,)).fetchone()
+            if not row:
+                return None
+            return json.loads(row[0])
 
     def latest_job_id(self) -> str | None:
         with self._lock:
-            if not self._latest_by_job:
+            row = self._conn.execute("SELECT job_id FROM scans ORDER BY created_at DESC LIMIT 1").fetchone()
+            if not row:
                 return None
-            return list(self._latest_by_job.keys())[-1]
+            return row[0]
 
     def allow_rate(self, key: str, limit: int, window_seconds: int) -> bool:
-        now = monotonic()
+        now = time.time()
         with self._lock:
-            state = self._rates.get(key)
-            if state is None or now - state.window_start > window_seconds:
-                self._rates[key] = RateState(count=1, window_start=now)
+            row = self._conn.execute(
+                "SELECT count, window_start FROM rate_limits WHERE rate_key = ?",
+                (key,),
+            ).fetchone()
+            if row is None or now - row[1] > window_seconds:
+                with self._conn:
+                    self._conn.execute(
+                        """
+                        INSERT INTO rate_limits(rate_key, count, window_start)
+                        VALUES(?, ?, ?)
+                        ON CONFLICT(rate_key) DO UPDATE SET count=excluded.count, window_start=excluded.window_start
+                        """,
+                        (key, 1, now),
+                    )
                 return True
-            if state.count >= limit:
+            if row[0] >= limit:
                 return False
-            state.count += 1
+            with self._conn:
+                self._conn.execute(
+                    "UPDATE rate_limits SET count = count + 1 WHERE rate_key = ?",
+                    (key,),
+                )
             return True

@@ -1,4 +1,6 @@
 import json
+import logging
+import time
 import uuid
 from collections import defaultdict
 from fastapi import FastAPI, UploadFile, File, WebSocket, WebSocketDisconnect, Query, Request
@@ -10,10 +12,12 @@ from config import get_settings
 from document_processor import process_upload, validate_upload
 from gemini_service import analyze_document_vision, ask_document_question
 from schemas import ApiError, AskRequest, AskResponse, ScanResponse, ScanResult
-from storage import InMemoryStore
+from storage import SQLiteStore
 
 load_dotenv()
 settings = get_settings()
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger("visio")
 app = FastAPI(title="VISIO")
 app.add_middleware(
     CORSMiddleware,
@@ -22,8 +26,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-store = InMemoryStore()
+store = SQLiteStore(settings.db_path)
 connections: dict[str, list[WebSocket]] = defaultdict(list)
+metrics = {
+    "requests_total": 0,
+    "scan_requests_total": 0,
+    "ask_requests_total": 0,
+    "errors_total": 0,
+}
 
 
 async def broadcast(job_id: str, data: dict) -> None:
@@ -33,6 +43,29 @@ async def broadcast(job_id: str, data: dict) -> None:
             await ws.send_text(payload)
         except Exception:
             connections[job_id].remove(ws)
+
+
+@app.middleware("http")
+async def request_context_middleware(request: Request, call_next):
+    request_id = request.headers.get("x-request-id") or str(uuid.uuid4())
+    start = time.time()
+    metrics["requests_total"] += 1
+    response = await call_next(request)
+    duration_ms = round((time.time() - start) * 1000, 2)
+    response.headers["x-request-id"] = request_id
+    logger.info(
+        json.dumps(
+            {
+                "event": "http_request",
+                "request_id": request_id,
+                "method": request.method,
+                "path": request.url.path,
+                "status_code": response.status_code,
+                "duration_ms": duration_ms,
+            }
+        )
+    )
+    return response
 
 
 @app.websocket("/ws")
@@ -53,10 +86,20 @@ def _rate_key(request: Request, action: str) -> str:
 
 
 def error_response(status: int, code: str, message: str, details: dict | None = None) -> JSONResponse:
+    metrics["errors_total"] += 1
     return JSONResponse(
         status_code=status,
         content=ApiError(code=code, error=message, status=status, details=details).model_dump(),
     )
+
+
+def check_api_key(request: Request) -> JSONResponse | None:
+    if not settings.api_key:
+        return None
+    supplied = request.headers.get("x-api-key", "")
+    if supplied != settings.api_key:
+        return error_response(401, "unauthorized", "Invalid API key")
+    return None
 
 
 @app.get("/")
@@ -72,6 +115,10 @@ async def scan_document(
     pdf_mode: str = Query(default="first_page"),
     pdf_page_limit: int = Query(default=3, ge=1, le=10),
 ):
+    auth_error = check_api_key(request)
+    if auth_error is not None:
+        return auth_error
+    metrics["scan_requests_total"] += 1
     if not store.allow_rate(_rate_key(request, "scan"), limit=20, window_seconds=60):
         return error_response(429, "rate_limit_scan", "Rate limit exceeded for /scan")
     file_bytes = await file.read()
@@ -129,6 +176,10 @@ async def scan_document(
 
 @app.post("/ask", response_model=AskResponse, responses={400: {"model": ApiError}, 429: {"model": ApiError}})
 async def ask_question(request: Request, body: AskRequest, job_id: str = Query(...)):
+    auth_error = check_api_key(request)
+    if auth_error is not None:
+        return auth_error
+    metrics["ask_requests_total"] += 1
     if not store.allow_rate(_rate_key(request, "ask"), limit=60, window_seconds=60):
         return error_response(429, "rate_limit_ask", "Rate limit exceeded for /ask")
     question = body.question.strip()
@@ -155,4 +206,9 @@ def get_latest(job_id: str | None = Query(default=None)):
 
 @app.get("/status")
 def status():
-    return {"ok": True}
+    return {"ok": True, "db_path": settings.db_path}
+
+
+@app.get("/metrics")
+def get_metrics():
+    return metrics
