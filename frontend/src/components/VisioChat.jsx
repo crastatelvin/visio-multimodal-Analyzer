@@ -23,7 +23,7 @@ export default function VisioChat({ jobId }) {
   };
 
   return (
-    <div className="card">
+    <div className="card dashboard-card">
       <div className="mono-title">VISIO Q&A</div>
       <div className="chat-box">
         {messages.map((m, i) => (

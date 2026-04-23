@@ -8,10 +8,10 @@ const TABS = ["summary", "entities", "keyvalues", "tables", "json"];
 
 export default function DataPanel({ data }) {
   const [tab, setTab] = useState("summary");
-  if (!data) return <div className="card">Scan a document to see extracted data.</div>;
+  if (!data) return <div className="card dashboard-card">Scan a document to see extracted data.</div>;
 
   return (
-    <div className="card card-bright">
+    <div className="card card-bright dashboard-card">
       <div className="tab-row">
         {TABS.map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`tab-btn ${tab === t ? "tab-active" : ""}`}>
@@ -26,7 +26,7 @@ export default function DataPanel({ data }) {
             <span className={`sent-${data.sentiment || "neutral"}`}>{data.sentiment || "neutral"}</span>
             <span className="mono-title">{Math.round((data.sentiment_score || 0.5) * 100)}%</span>
           </div>
-          <p>{data.summary || "No summary available."}</p>
+          <p className="panel-copy">{data.summary || "No summary available."}</p>
         </div>
       )}
       {tab === "entities" && <EntityChips entities={data.entities} />}

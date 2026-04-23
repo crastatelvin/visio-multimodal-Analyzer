@@ -6,10 +6,15 @@ import VisioChat from "../components/VisioChat";
 
 export default function ScannerPage({ data, imageBase64, mediaType, scanning, scanStep, onReset, jobId, error }) {
   return (
-    <div className="scanner-shell">
-      <div className="scanner-top">
-        <h2 className="logo" style={{ margin: 0 }}>VISIO</h2>
-        <button className="upload-btn" onClick={onReset}>NEW SCAN</button>
+    <div className="scanner-root">
+      <div className="scanner-bg" />
+      <div className="scanner-shell">
+      <div className="scanner-top scanner-top-glass">
+        <div className="landing-brand">
+          <div className="landing-brand-icon">◆</div>
+          <h1>VISIO</h1>
+        </div>
+        <button className="upload-btn" onClick={onReset}>New Scan</button>
       </div>
       <ScanProgress currentStep={scanStep} visible={scanning} />
       {error && <div className="error">{error}</div>}
@@ -19,6 +24,7 @@ export default function ScannerPage({ data, imageBase64, mediaType, scanning, sc
         <DataPanel data={data} />
       </div>
       {data && <VisioChat jobId={jobId} />}
+      </div>
     </div>
   );
 }

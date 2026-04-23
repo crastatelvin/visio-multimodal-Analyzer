@@ -9,7 +9,7 @@ export default function ScanProgress({ currentStep, visible }) {
   if (!visible) return null;
   const currentIndex = LAYERS.findIndex((l) => l.id === currentStep);
   return (
-    <div className="card">
+    <div className="card dashboard-card">
       <div className="mono-title">SCAN PROGRESS</div>
       <div className="progressRow">
         {LAYERS.map((layer, i) => {

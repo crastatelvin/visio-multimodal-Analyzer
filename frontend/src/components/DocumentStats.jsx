@@ -17,7 +17,7 @@ export default function DocumentStats({ data }) {
         if (item.key === "tables") value = data?.tables?.length || 0;
         if (item.key === "confidence") value = `${data?.confidence || 0}%`;
         return (
-          <div key={item.key} className="card stat-card">
+          <div key={item.key} className="card stat-card dashboard-card">
             <div style={{ color: item.color }} className="stat-value">
               {value || "-"}
             </div>
