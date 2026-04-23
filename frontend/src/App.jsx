@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import UploadPage from "./pages/UploadPage";
 import ScannerPage from "./pages/ScannerPage";
 import useWebSocket from "./hooks/useWebSocket";
@@ -11,13 +11,20 @@ export default function App() {
   const [scanStep, setScanStep] = useState("");
   const [result, setResult] = useState(null);
   const [scanning, setScanning] = useState(false);
+  const [scannerView, setScannerView] = useState(false);
   const wsUrl = useMemo(() => (jobId ? `${WS_BASE}?job_id=${encodeURIComponent(jobId)}` : ""), [jobId]);
+
+  const handleWsMessage = useCallback((payload) => {
+    setScanStep(payload.step || "");
+    if (payload.step === "complete") {
+      setScanning(false);
+      setScannerView(true);
+    }
+  }, []);
+
   useWebSocket(
     wsUrl,
-    (payload) => {
-      setScanStep(payload.step || "");
-      if (payload.step === "complete") setScanning(false);
-    },
+    handleWsMessage,
     Boolean(jobId && scanning)
   );
 
@@ -25,6 +32,7 @@ export default function App() {
     setJobId(nextJobId || "");
     setResult(null);
     setScanning(true);
+    setScannerView(true);
     setScanStep("uploading");
   };
 
@@ -32,21 +40,24 @@ export default function App() {
     setJobId(response.job_id);
     setResult(response.result);
     setScanning(false);
+    setScannerView(true);
     setScanStep("complete");
   };
 
   const handleScanError = () => {
     setScanning(false);
+    setScannerView(false);
     setScanStep("error");
   };
 
   const reset = () => {
     setResult(null);
     setScanning(false);
+    setScannerView(false);
     setScanStep("");
   };
 
-  return result || scanning ? (
+  return scannerView ? (
     <ScannerPage
       data={result}
       imageBase64={result?.preview_base64 || ""}
