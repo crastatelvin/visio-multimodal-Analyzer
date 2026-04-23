@@ -84,7 +84,9 @@ body {
 }
 .panel-copy {
   color: #cbd5e1;
-  line-height: 1.65;
+  line-height: 1.85;
+  font-size: 1.05rem;
+  letter-spacing: 0.1px;
 }
 
 .scanner-header {
@@ -124,10 +126,33 @@ body {
 .progressNode.done { border-color: var(--blue-light); color: var(--blue-light); }
 .progressNode.active { border-color: var(--green); color: var(--green); }
 
-.tab-row { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
-.tab-btn { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: rgba(226,232,240,0.5); padding: 0.24rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.62rem; font-family: "IBM Plex Mono", monospace; }
-.tab-active { border-color: var(--blue-light); color: var(--blue-light); }
-.summary-line { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.7rem; }
+.tab-row { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.tab-btn {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(226,232,240,0.78);
+  padding: 0.35rem 0.62rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  letter-spacing: 0.4px;
+  font-family: "IBM Plex Mono", monospace;
+}
+.tab-active {
+  border-color: var(--blue-light);
+  color: #dbeafe;
+  box-shadow: inset 0 0 0 1px rgba(59,130,246,0.35);
+}
+.summary-line {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.95rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.35);
+}
 .sent-positive { color: var(--green); }
 .sent-negative { color: var(--rose); }
 .sent-neutral { color: #94a3b8; }
