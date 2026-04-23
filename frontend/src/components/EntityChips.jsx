@@ -12,9 +12,11 @@ export default function EntityChips({ entities }) {
     <div className="chip-wrap">
       {entities.map((entity, i) => (
         <div key={`${entity.type}-${i}`} className={`entity-chip ${STYLE_MAP[entity.type] || ""}`}>
-          <span className="chip-type">{entity.type}</span>
-          <span>{entity.value}</span>
-          <span className="chip-conf">{entity.confidence}%</span>
+          <div className="chip-head">
+            <span className="chip-type">{entity.type}</span>
+            <span className="chip-conf">{entity.confidence}%</span>
+          </div>
+          <div className="chip-value">{entity.value}</div>
         </div>
       ))}
     </div>

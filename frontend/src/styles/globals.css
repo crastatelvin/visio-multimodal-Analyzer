@@ -132,14 +132,49 @@ body {
 .sent-negative { color: var(--rose); }
 .sent-neutral { color: #94a3b8; }
 
-.chip-wrap { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-.entity-chip { padding: 0.2rem 0.45rem; border: 1px solid rgba(148,163,184,0.35); border-radius: 4px; display: flex; gap: 0.3rem; align-items: center; font-size: 0.7rem; }
-.chip-type, .chip-conf { font-family: "IBM Plex Mono", monospace; opacity: 0.8; font-size: 0.58rem; }
-.ent-person { border-color: rgba(245,158,11,0.5); color: #fbbf24; }
-.ent-org { border-color: rgba(59,130,246,0.5); color: #60a5fa; }
-.ent-date { border-color: rgba(16,185,129,0.5); color: #34d399; }
-.ent-amount { border-color: rgba(244,63,94,0.5); color: #fb7185; }
-.ent-location { border-color: rgba(139,92,246,0.5); color: #a78bfa; }
+.chip-wrap { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.55rem; }
+.entity-chip {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgba(148,163,184,0.35);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+  background: rgba(2, 8, 23, 0.65);
+}
+.chip-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+.chip-type {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+.chip-conf {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.62rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 999px;
+  padding: 0.08rem 0.35rem;
+  color: #dbeafe;
+}
+.chip-value {
+  color: #f8fafc;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+.ent-person { border-color: rgba(245,158,11,0.6); box-shadow: inset 0 0 0 1px rgba(245,158,11,0.12); }
+.ent-org { border-color: rgba(59,130,246,0.6); box-shadow: inset 0 0 0 1px rgba(59,130,246,0.12); }
+.ent-date { border-color: rgba(16,185,129,0.6); box-shadow: inset 0 0 0 1px rgba(16,185,129,0.12); }
+.ent-amount { border-color: rgba(244,63,94,0.6); box-shadow: inset 0 0 0 1px rgba(244,63,94,0.12); }
+.ent-location { border-color: rgba(139,92,246,0.6); box-shadow: inset 0 0 0 1px rgba(139,92,246,0.12); }
 
 .kv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 .kv-card { border: 1px solid rgba(20,184,166,0.2); background: rgba(20,184,166,0.05); border-radius: 4px; padding: 0.5rem; }
